@@ -1,0 +1,284 @@
+.App {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+h1 {
+  color: #333;
+  margin: 0;
+  font-size: 2.5em;
+  flex: 1;
+  text-align: center;
+}
+
+.clear-all-btn {
+  padding: 12px 24px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.clear-all-btn:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.clear-all-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  color: #555;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+}
+
+.budget-section {
+  margin-bottom: 40px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.budget-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 0.9em;
+}
+
+.input-group input {
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1em;
+  transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.weekly-budget {
+  margin-top: 20px;
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+  border-left: 4px solid #667eea;
+}
+
+.weekly-budget p {
+  margin: 5px 0;
+  color: #555;
+  font-size: 1em;
+}
+
+.weekly-budget .remaining {
+  font-weight: 600;
+  color: #667eea;
+  font-size: 1.1em;
+}
+
+.weekly-section {
+  margin-top: 30px;
+}
+
+.weekly-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.weekly-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.weekly-table th {
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.95em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.weekly-table tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.2s;
+}
+
+.weekly-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.weekly-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.weekly-table td {
+  padding: 12px 15px;
+}
+
+.day-label {
+  font-weight: 600;
+  color: #333;
+  width: 120px;
+}
+
+.weekly-table input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 0.95em;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.weekly-table input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.weekly-table input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+/* Mobile card layout */
+.weekly-mobile {
+  display: none;
+}
+
+.day-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.day-card-header {
+  font-weight: 600;
+  font-size: 1.2em;
+  color: #333;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.day-card-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.day-card-input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.day-card-input-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #555;
+  font-size: 0.9em;
+}
+
+.day-card-input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1em;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.day-card-input-group input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.day-card-input-group input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+
+  .header-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  h1 {
+    font-size: 1.8em;
+    text-align: center;
+  }
+
+  .clear-all-btn {
+    width: 100%;
+  }
+
+  .budget-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  /* Hide table on mobile */
+  .weekly-table {
+    display: none;
+  }
+
+  /* Show mobile card layout */
+  .weekly-mobile {
+    display: block;
+  }
+}
