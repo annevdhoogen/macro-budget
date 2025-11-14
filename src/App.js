@@ -84,20 +84,26 @@ function App() {
   }, [weeklyEntries, isInitialized]);
 
   const handleDailyBudgetChange = (field, value) => {
-    setDailyBudget((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    // Allow empty string or positive whole numbers only (no decimals)
+    if (value === "" || /^\d+$/.test(value)) {
+      setDailyBudget((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
   };
 
   const handleWeeklyEntryChange = (day, field, value) => {
-    setWeeklyEntries((prev) => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [field]: value,
-      },
-    }));
+    // Allow empty string or positive whole numbers only (no decimals)
+    if (value === "" || /^\d+$/.test(value)) {
+      setWeeklyEntries((prev) => ({
+        ...prev,
+        [day]: {
+          ...prev[day],
+          [field]: value,
+        },
+      }));
+    }
   };
 
   const handleClearAll = () => {
@@ -194,6 +200,9 @@ function App() {
               <label>Calories</label>
               <input
                 type="number"
+                min="0"
+                step="1"
+                inputMode="numeric"
                 value={dailyBudget.calories}
                 onChange={(e) =>
                   handleDailyBudgetChange("calories", e.target.value)
@@ -205,6 +214,9 @@ function App() {
               <label>Carbs (g)</label>
               <input
                 type="number"
+                min="0"
+                step="1"
+                inputMode="numeric"
                 value={dailyBudget.carbs}
                 onChange={(e) =>
                   handleDailyBudgetChange("carbs", e.target.value)
@@ -216,6 +228,9 @@ function App() {
               <label>Protein (g)</label>
               <input
                 type="number"
+                min="0"
+                step="1"
+                inputMode="numeric"
                 value={dailyBudget.protein}
                 onChange={(e) =>
                   handleDailyBudgetChange("protein", e.target.value)
@@ -227,6 +242,9 @@ function App() {
               <label>Fat (g)</label>
               <input
                 type="number"
+                min="0"
+                step="1"
+                inputMode="numeric"
                 value={dailyBudget.fat}
                 onChange={(e) => handleDailyBudgetChange("fat", e.target.value)}
                 placeholder="Daily fat"
@@ -270,6 +288,9 @@ function App() {
                     <td>
                       <input
                         type="number"
+                        min="0"
+                        step="1"
+                        inputMode="numeric"
                         value={entry.calories}
                         onChange={(e) =>
                           handleWeeklyEntryChange(
@@ -288,6 +309,9 @@ function App() {
                     <td>
                       <input
                         type="number"
+                        min="0"
+                        step="1"
+                        inputMode="numeric"
                         value={entry.carbs}
                         onChange={(e) =>
                           handleWeeklyEntryChange(day, "carbs", e.target.value)
@@ -302,6 +326,9 @@ function App() {
                     <td>
                       <input
                         type="number"
+                        min="0"
+                        step="1"
+                        inputMode="numeric"
                         value={entry.protein}
                         onChange={(e) =>
                           handleWeeklyEntryChange(
@@ -320,6 +347,9 @@ function App() {
                     <td>
                       <input
                         type="number"
+                        min="0"
+                        step="1"
+                        inputMode="numeric"
                         value={entry.fat}
                         onChange={(e) =>
                           handleWeeklyEntryChange(day, "fat", e.target.value)
@@ -349,6 +379,9 @@ function App() {
                       <label>Calories</label>
                       <input
                         type="number"
+                        min="0"
+                        step="1"
+                        inputMode="numeric"
                         value={entry.calories}
                         onChange={(e) =>
                           handleWeeklyEntryChange(
@@ -368,6 +401,9 @@ function App() {
                       <label>Carbs (g)</label>
                       <input
                         type="number"
+                        min="0"
+                        step="1"
+                        inputMode="numeric"
                         value={entry.carbs}
                         onChange={(e) =>
                           handleWeeklyEntryChange(day, "carbs", e.target.value)
@@ -383,6 +419,9 @@ function App() {
                       <label>Protein (g)</label>
                       <input
                         type="number"
+                        min="0"
+                        step="1"
+                        inputMode="numeric"
                         value={entry.protein}
                         onChange={(e) =>
                           handleWeeklyEntryChange(
@@ -402,6 +441,9 @@ function App() {
                       <label>Fat (g)</label>
                       <input
                         type="number"
+                        min="0"
+                        step="1"
+                        inputMode="numeric"
                         value={entry.fat}
                         onChange={(e) =>
                           handleWeeklyEntryChange(day, "fat", e.target.value)
