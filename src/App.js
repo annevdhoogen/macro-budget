@@ -52,6 +52,101 @@ const calculateCalories = (carbs, protein, fat) => {
   return carbsNum * 4 + proteinNum * 4 + fatNum * 9;
 };
 
+// Get current day name
+const getCurrentDay = () => {
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  return days[new Date().getDay()];
+};
+
+// Check if a day is filled (has at least one macro value)
+const isDayFilled = (dayEntry) => {
+  return (
+    parseFloat(dayEntry.calories) > 0 ||
+    parseFloat(dayEntry.carbs) > 0 ||
+    parseFloat(dayEntry.protein) > 0 ||
+    parseFloat(dayEntry.fat) > 0
+  );
+};
+
+// Request notification permission and set up daily reminder
+const setupNotifications = (getWeeklyEntries) => {
+  if (!("Notification" in window)) {
+    console.log("This browser does not support notifications");
+    return;
+  }
+
+  // Request permission
+  if (Notification.permission === "default") {
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        scheduleDailyReminder(getWeeklyEntries);
+      }
+    });
+  } else if (Notification.permission === "granted") {
+    scheduleDailyReminder(getWeeklyEntries);
+  }
+};
+
+// Store interval reference to avoid multiple timers
+let notificationInterval = null;
+let notificationTimeout = null;
+
+// Schedule daily reminder at 22:00
+const scheduleDailyReminder = (getWeeklyEntries) => {
+  // Clear any existing timers
+  if (notificationInterval) {
+    clearInterval(notificationInterval);
+  }
+  if (notificationTimeout) {
+    clearTimeout(notificationTimeout);
+  }
+
+  const checkAndNotify = () => {
+    const weeklyEntries = getWeeklyEntries();
+    const currentDay = getCurrentDay();
+    const dayEntry = weeklyEntries[currentDay];
+
+    if (dayEntry && !isDayFilled(dayEntry)) {
+      new Notification("Macros Reminder", {
+        body: `Don't forget to fill in your macros for ${currentDay}!`,
+        icon: "/icon-block.svg",
+        badge: "/icon-block.svg",
+        tag: `macro-reminder-${currentDay}`,
+      });
+    }
+  };
+
+  // Check immediately if it's after 22:00
+  const now = new Date();
+  const currentHour = now.getHours();
+  if (currentHour >= 22) {
+    checkAndNotify();
+  }
+
+  // Schedule check for 22:00 today if not past yet, otherwise schedule for tomorrow
+  const targetTime = new Date();
+  if (currentHour >= 22) {
+    targetTime.setDate(targetTime.getDate() + 1);
+  }
+  targetTime.setHours(22, 0, 0, 0);
+
+  const msUntilTarget = targetTime.getTime() - now.getTime();
+
+  notificationTimeout = setTimeout(() => {
+    checkAndNotify();
+    // Set up recurring check every 24 hours
+    notificationInterval = setInterval(checkAndNotify, 24 * 60 * 60 * 1000);
+  }, msUntilTarget);
+};
+
 function App() {
   // Initialize state from localStorage if available
   const getInitialDailyBudget = () => {
@@ -81,6 +176,13 @@ function App() {
   useEffect(() => {
     setIsInitialized(true);
   }, []);
+
+  // Set up notifications when app loads and when weeklyEntries changes
+  useEffect(() => {
+    if (isInitialized && weeklyEntries) {
+      setupNotifications(() => weeklyEntries);
+    }
+  }, [isInitialized, weeklyEntries]);
 
   // Save to localStorage whenever data changes (but not on initial mount)
   useEffect(() => {
