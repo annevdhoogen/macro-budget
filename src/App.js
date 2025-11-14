@@ -39,17 +39,29 @@ function removeLocalStorage(name) {
 }
 
 const DEFAULT_DAILY_BUDGET = {
-  calories: "2105",
   carbs: "270",
   protein: "110",
   fat: "65",
+};
+
+// Calculate calories from macros: 1g protein = 4 kcal, 1g carb = 4 kcal, 1g fat = 9 kcal
+const calculateCalories = (carbs, protein, fat) => {
+  const carbsNum = parseFloat(carbs) || 0;
+  const proteinNum = parseFloat(protein) || 0;
+  const fatNum = parseFloat(fat) || 0;
+  return carbsNum * 4 + proteinNum * 4 + fatNum * 9;
 };
 
 function App() {
   // Initialize state from localStorage if available
   const getInitialDailyBudget = () => {
     const saved = getLocalStorage("macroDailyBudget");
-    return saved || DEFAULT_DAILY_BUDGET;
+    if (saved) {
+      // Remove calories if it exists (for backward compatibility)
+      const { calories, ...rest } = saved;
+      return rest;
+    }
+    return DEFAULT_DAILY_BUDGET;
   };
 
   const getInitialWeeklyEntries = () => {
@@ -124,8 +136,13 @@ function App() {
 
   // Calculate remaining budget and distribute across remaining days
   const calculateRemaining = () => {
+    const dailyCalories = calculateCalories(
+      dailyBudget.carbs,
+      dailyBudget.protein,
+      dailyBudget.fat
+    );
     const weeklyBudget = {
-      calories: parseFloat(dailyBudget.calories) * 7 || 0,
+      calories: dailyCalories * 7,
       carbs: parseFloat(dailyBudget.carbs) * 7 || 0,
       protein: parseFloat(dailyBudget.protein) * 7 || 0,
       fat: parseFloat(dailyBudget.fat) * 7 || 0,
@@ -200,15 +217,15 @@ function App() {
               <label>Calories</label>
               <input
                 type="number"
-                min="0"
-                step="1"
-                inputMode="numeric"
-                value={dailyBudget.calories}
-                onChange={(e) =>
-                  handleDailyBudgetChange("calories", e.target.value)
-                }
-                placeholder="Daily calories"
+                disabled
+                value={calculateCalories(
+                  dailyBudget.carbs,
+                  dailyBudget.protein,
+                  dailyBudget.fat
+                )}
+                readOnly
               />
+              <span className="input-helper">Calculated from macros</span>
             </div>
             <div className="input-group">
               <label>Carbs (g)</label>
@@ -253,8 +270,13 @@ function App() {
           </div>
           <div className="weekly-budget">
             <p>
-              Weekly Budget: {parseFloat(dailyBudget.calories) * 7 || 0} cal,{" "}
-              {parseFloat(dailyBudget.carbs) * 7 || 0}g carbs,{" "}
+              Weekly Budget:{" "}
+              {calculateCalories(
+                dailyBudget.carbs,
+                dailyBudget.protein,
+                dailyBudget.fat
+              ) * 7}{" "}
+              cal, {parseFloat(dailyBudget.carbs) * 7 || 0}g carbs,{" "}
               {parseFloat(dailyBudget.protein) * 7 || 0}g protein,{" "}
               {parseFloat(dailyBudget.fat) * 7 || 0}g fat
             </p>
