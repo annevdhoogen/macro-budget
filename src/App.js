@@ -184,8 +184,18 @@ function App() {
       return Math.round(remaining[field] / emptyCount);
     };
 
+    const filledDays = 7 - emptyFields.calories.length;
+    const average = {
+      calories: filledDays > 0 ? totals.calories / filledDays : 0,
+      carbs: filledDays > 0 ? totals.carbs / filledDays : 0,
+      protein: filledDays > 0 ? totals.protein / filledDays : 0,
+      fat: filledDays > 0 ? totals.fat / filledDays : 0,
+    };
+
     return {
       remaining,
+      average,
+      filledDays,
       getPlaceholder,
       isEmptyField: (day, field) => {
         const value = parseFloat(weeklyEntries[day][field]);
@@ -194,7 +204,8 @@ function App() {
     };
   };
 
-  const { remaining, getPlaceholder, isEmptyField } = calculateRemaining();
+  const { remaining, average, filledDays, getPlaceholder, isEmptyField } =
+    calculateRemaining();
 
   return (
     <div className="App">
@@ -282,6 +293,14 @@ function App() {
               {remaining.protein.toFixed(0)}g protein,{" "}
               {remaining.fat.toFixed(0)}g fat
             </p>
+            {filledDays > 0 && (
+              <p className="average">
+                Daily average ({filledDays} day{filledDays !== 1 ? "s" : ""}):{" "}
+                {average.calories.toFixed(0)} cal, {average.carbs.toFixed(0)}g
+                carbs, {average.protein.toFixed(0)}g protein,{" "}
+                {average.fat.toFixed(0)}g fat
+              </p>
+            )}
           </div>
         </div>
 
