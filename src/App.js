@@ -1,66 +1,15 @@
 import { useState, useEffect } from "react";
 import "./App.css";
-
-const fmt = (n) =>
-  Math.round(n).toLocaleString("nl-NL", { maximumFractionDigits: 0 });
-
-const DAYS = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
-
-// localStorage helper functions
-function setLocalStorage(name, value) {
-  try {
-    localStorage.setItem(name, JSON.stringify(value));
-  } catch (e) {
-    console.error("Error saving to localStorage:", e);
-  }
-}
-
-function getLocalStorage(name) {
-  try {
-    const item = localStorage.getItem(name);
-    return item ? JSON.parse(item) : null;
-  } catch (e) {
-    console.error("Error reading from localStorage:", e);
-    return null;
-  }
-}
-
-function removeLocalStorage(name) {
-  try {
-    localStorage.removeItem(name);
-  } catch (e) {
-    console.error("Error removing from localStorage:", e);
-  }
-}
-
-const DEFAULT_DAILY_BUDGET = {
-  carbs: "170",
-  protein: "110",
-  fat: "50",
-};
-
-// Calculate calories from macros: 1g protein = 4 kcal, 1g carb = 4 kcal, 1g fat = 9 kcal
-const calculateCalories = (carbs, protein, fat) => {
-  const carbsNum = parseFloat(carbs) || 0;
-  const proteinNum = parseFloat(protein) || 0;
-  const fatNum = parseFloat(fat) || 0;
-  return carbsNum * 4 + proteinNum * 4 + fatNum * 9;
-};
+import { setLocalStorage, getLocalStorage, removeLocalStorage } from "./utils/localStorage";
+import { DAYS, DEFAULT_DAILY_BUDGET, calculateCalories } from "./utils/macros";
+import DailyBudget from "./components/DailyBudget";
+import WeeklyRemaining from "./components/WeeklyRemaining";
+import WeeklyPlan from "./components/WeeklyPlan";
 
 function App() {
-  // Initialize state from localStorage if available
   const getInitialDailyBudget = () => {
     const saved = getLocalStorage("macroDailyBudget");
     if (saved) {
-      // Remove calories if it exists (for backward compatibility)
       const { calories, ...rest } = saved;
       return rest;
     }
@@ -83,12 +32,10 @@ function App() {
   );
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Mark as initialized after first render
   useEffect(() => {
     setIsInitialized(true);
   }, []);
 
-  // Save to localStorage whenever data changes (but not on initial mount)
   useEffect(() => {
     if (isInitialized) {
       setLocalStorage("macroDailyBudget", dailyBudget);
@@ -108,42 +55,30 @@ function App() {
   }, [budgetLocked, isInitialized]);
 
   const handleDailyBudgetChange = (field, value) => {
-    // Allow empty string or positive whole numbers only (no decimals)
     if (value === "" || /^\d+$/.test(value)) {
-      setDailyBudget((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
+      setDailyBudget((prev) => ({ ...prev, [field]: value }));
     }
   };
 
   const handleWeeklyEntryChange = (day, field, value) => {
-    // Allow empty string or positive whole numbers only (no decimals)
     if (value === "" || /^\d+$/.test(value)) {
       setWeeklyEntries((prev) => ({
         ...prev,
-        [day]: {
-          ...prev[day],
-          [field]: value,
-        },
+        [day]: { ...prev[day], [field]: value },
       }));
     }
   };
 
   const handleClearAll = () => {
     if (!window.confirm("Are you sure you want to clear all weekly entries?")) return;
-    // Reset weekly entries
     const emptyWeeklyEntries = DAYS.reduce((acc, day) => {
       acc[day] = { calories: "", carbs: "", protein: "", fat: "" };
       return acc;
     }, {});
     setWeeklyEntries(emptyWeeklyEntries);
-
-    // Clear localStorage
     removeLocalStorage("macroWeeklyEntries");
   };
 
-  // Calculate remaining budget and distribute across remaining days
   const calculateRemaining = () => {
     const dailyCalories = calculateCalories(
       dailyBudget.carbs,
@@ -157,19 +92,8 @@ function App() {
       fat: parseFloat(dailyBudget.fat) * 7 || 0,
     };
 
-    const totals = {
-      calories: 0,
-      carbs: 0,
-      protein: 0,
-      fat: 0,
-    };
-
-    const emptyFields = {
-      calories: [],
-      carbs: [],
-      protein: [],
-      fat: [],
-    };
+    const totals = { calories: 0, carbs: 0, protein: 0, fat: 0 };
+    const emptyFields = { calories: [], carbs: [], protein: [], fat: [] };
 
     DAYS.forEach((day) => {
       const entry = weeklyEntries[day];
@@ -190,13 +114,11 @@ function App() {
       fat: weeklyBudget.fat - totals.fat,
     };
 
-    // Calculate placeholders for each field type
     const getPlaceholder = (field) => {
       const emptyCount = emptyFields[field].length;
       if (emptyCount === 0) return 0;
       return Math.round(remaining[field] / emptyCount);
     };
-
 
     return {
       remaining,
@@ -210,13 +132,8 @@ function App() {
     };
   };
 
-  const {
-    remaining,
-    weeklyBudget,
-    totals,
-    getPlaceholder,
-    isEmptyField,
-  } = calculateRemaining();
+  const { remaining, weeklyBudget, totals, getPlaceholder, isEmptyField } =
+    calculateRemaining();
 
   return (
     <div className="App">
@@ -228,310 +145,25 @@ function App() {
           </button>
         </div>
 
-        <div className="budget-section">
-          <div className="budget-header">
-            <h2>Daily Budget</h2>
-            <button
-              className={`lock-btn${budgetLocked ? " locked" : ""}`}
-              onClick={() => setBudgetLocked((prev) => !prev)}
-              title={budgetLocked ? "Unlock budget" : "Lock budget"}
-            >
-              {budgetLocked ? "🔒" : "🔓"}
-            </button>
-          </div>
-          <div className="budget-inputs">
-            <div className="input-group">
-              <label>Calories</label>
-              <input
-                type="number"
-                disabled
-                value={calculateCalories(
-                  dailyBudget.carbs,
-                  dailyBudget.protein,
-                  dailyBudget.fat,
-                )}
-                readOnly
-              />
-              <span className="input-helper">Calculated from macros</span>
-            </div>
-            <div className="input-group">
-              <label>Carbs (g)</label>
-              <input
-                type="number"
-                min="0"
-                step="1"
-                inputMode="numeric"
-                disabled={budgetLocked}
-                value={dailyBudget.carbs}
-                onChange={(e) =>
-                  handleDailyBudgetChange("carbs", e.target.value)
-                }
-                placeholder="Daily carbs"
-              />
-            </div>
-            <div className="input-group">
-              <label>Protein (g)</label>
-              <input
-                type="number"
-                min="0"
-                step="1"
-                inputMode="numeric"
-                disabled={budgetLocked}
-                value={dailyBudget.protein}
-                onChange={(e) =>
-                  handleDailyBudgetChange("protein", e.target.value)
-                }
-                placeholder="Daily protein"
-              />
-            </div>
-            <div className="input-group">
-              <label>Fat (g)</label>
-              <input
-                type="number"
-                min="0"
-                step="1"
-                inputMode="numeric"
-                disabled={budgetLocked}
-                value={dailyBudget.fat}
-                onChange={(e) => handleDailyBudgetChange("fat", e.target.value)}
-                placeholder="Daily fat"
-              />
-            </div>
-          </div>
-          <div className="weekly-budget">
-            <h3>Weekly Remaining</h3>
-            <div className="remaining-bars">
-              {[
-                { label: "Calories", key: "calories", unit: "cal" },
-                { label: "Carbs", key: "carbs", unit: "g" },
-                { label: "Protein", key: "protein", unit: "g" },
-                { label: "Fat", key: "fat", unit: "g" },
-              ].map(({ label, key, unit }) => {
-                const budget = weeklyBudget[key];
-                const used = totals[key];
-                const pct =
-                  budget > 0 ? Math.min((used / budget) * 100, 100) : 0;
-                const over = used > budget;
-                return (
-                  <div className="remaining-bar-row" key={key}>
-                    <span className="remaining-bar-label">{label}</span>
-                    <div className="remaining-bar-track">
-                      <div
-                        className={`remaining-bar-fill${over ? " over" : ""}`}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span
-                      className={`remaining-bar-value${over ? " over" : ""}`}
-                    >
-                      {over
-                        ? `${fmt(Math.abs(remaining[key]))}${unit} over`
-                        : `${fmt(remaining[key])}${unit} left`}
-                    </span>
-                    <span className="remaining-bar-detail">
-                      {fmt(used)} / {fmt(budget)}{unit}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        <DailyBudget
+          dailyBudget={dailyBudget}
+          budgetLocked={budgetLocked}
+          onBudgetChange={handleDailyBudgetChange}
+          onToggleLock={() => setBudgetLocked((prev) => !prev)}
+        />
 
-        <div className="weekly-section">
-          <h2>Weekly Plan</h2>
-          <table className="weekly-table">
-            <thead>
-              <tr>
-                <th>Day</th>
-                <th>Calories</th>
-                <th>Carbs (g)</th>
-                <th>Protein (g)</th>
-                <th>Fat (g)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {DAYS.map((day) => {
-                const entry = weeklyEntries[day];
-                return (
-                  <tr key={day}>
-                    <td className="day-label">{day}</td>
-                    <td>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        inputMode="numeric"
-                        value={entry.calories}
-                        onChange={(e) =>
-                          handleWeeklyEntryChange(
-                            day,
-                            "calories",
-                            e.target.value,
-                          )
-                        }
-                        placeholder={
-                          isEmptyField(day, "calories")
-                            ? getPlaceholder("calories").toString()
-                            : ""
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        inputMode="numeric"
-                        value={entry.carbs}
-                        onChange={(e) =>
-                          handleWeeklyEntryChange(day, "carbs", e.target.value)
-                        }
-                        placeholder={
-                          isEmptyField(day, "carbs")
-                            ? getPlaceholder("carbs").toString()
-                            : ""
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        inputMode="numeric"
-                        value={entry.protein}
-                        onChange={(e) =>
-                          handleWeeklyEntryChange(
-                            day,
-                            "protein",
-                            e.target.value,
-                          )
-                        }
-                        placeholder={
-                          isEmptyField(day, "protein")
-                            ? getPlaceholder("protein").toString()
-                            : ""
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        inputMode="numeric"
-                        value={entry.fat}
-                        onChange={(e) =>
-                          handleWeeklyEntryChange(day, "fat", e.target.value)
-                        }
-                        placeholder={
-                          isEmptyField(day, "fat")
-                            ? getPlaceholder("fat").toString()
-                            : ""
-                        }
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <WeeklyRemaining
+          weeklyBudget={weeklyBudget}
+          totals={totals}
+          remaining={remaining}
+        />
 
-          {/* Mobile-friendly card layout */}
-          <div className="weekly-mobile">
-            {DAYS.map((day) => {
-              const entry = weeklyEntries[day];
-              return (
-                <div key={day} className="day-card">
-                  <div className="day-card-header">{day}</div>
-                  <div className="day-card-inputs">
-                    <div className="day-card-input-group">
-                      <label>Calories</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        inputMode="numeric"
-                        value={entry.calories}
-                        onChange={(e) =>
-                          handleWeeklyEntryChange(
-                            day,
-                            "calories",
-                            e.target.value,
-                          )
-                        }
-                        placeholder={
-                          isEmptyField(day, "calories")
-                            ? getPlaceholder("calories").toString()
-                            : ""
-                        }
-                      />
-                    </div>
-                    <div className="day-card-input-group">
-                      <label>Carbs (g)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        inputMode="numeric"
-                        value={entry.carbs}
-                        onChange={(e) =>
-                          handleWeeklyEntryChange(day, "carbs", e.target.value)
-                        }
-                        placeholder={
-                          isEmptyField(day, "carbs")
-                            ? getPlaceholder("carbs").toString()
-                            : ""
-                        }
-                      />
-                    </div>
-                    <div className="day-card-input-group">
-                      <label>Protein (g)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        inputMode="numeric"
-                        value={entry.protein}
-                        onChange={(e) =>
-                          handleWeeklyEntryChange(
-                            day,
-                            "protein",
-                            e.target.value,
-                          )
-                        }
-                        placeholder={
-                          isEmptyField(day, "protein")
-                            ? getPlaceholder("protein").toString()
-                            : ""
-                        }
-                      />
-                    </div>
-                    <div className="day-card-input-group">
-                      <label>Fat (g)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        inputMode="numeric"
-                        value={entry.fat}
-                        onChange={(e) =>
-                          handleWeeklyEntryChange(day, "fat", e.target.value)
-                        }
-                        placeholder={
-                          isEmptyField(day, "fat")
-                            ? getPlaceholder("fat").toString()
-                            : ""
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <WeeklyPlan
+          weeklyEntries={weeklyEntries}
+          onEntryChange={handleWeeklyEntryChange}
+          getPlaceholder={getPlaceholder}
+          isEmptyField={isEmptyField}
+        />
       </div>
     </div>
   );
