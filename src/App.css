@@ -147,16 +147,69 @@ h2 {
   border-left: 4px solid #667eea;
 }
 
+.weekly-budget h3 {
+  margin-top: 0;
+  color: #555;
+}
+
 .weekly-budget p {
   margin: 5px 0;
   color: #555;
   font-size: 1em;
 }
 
-.weekly-budget .remaining {
+.remaining-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.remaining-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.remaining-bar-label {
+  width: 65px;
+  font-weight: 600;
+  font-size: 0.85em;
+  color: #555;
+  flex-shrink: 0;
+}
+
+.remaining-bar-track {
+  flex: 1;
+  height: 10px;
+  background: #e9ecef;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.remaining-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transition: width 0.4s ease;
+}
+
+.remaining-bar-fill.over {
+  background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+.remaining-bar-value {
+  width: 130px;
+  text-align: right;
+  font-size: 0.85em;
   font-weight: 600;
   color: #667eea;
-  font-size: 1.1em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.remaining-bar-value.over {
+  color: #e74c3c;
 }
 
 .weekly-section {

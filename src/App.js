@@ -194,6 +194,8 @@ function App() {
 
     return {
       remaining,
+      weeklyBudget,
+      totals,
       average,
       filledDays,
       getPlaceholder,
@@ -204,8 +206,15 @@ function App() {
     };
   };
 
-  const { remaining, average, filledDays, getPlaceholder, isEmptyField } =
-    calculateRemaining();
+  const {
+    remaining,
+    weeklyBudget,
+    totals,
+    average,
+    filledDays,
+    getPlaceholder,
+    isEmptyField,
+  } = calculateRemaining();
 
   return (
     <div className="App">
@@ -276,31 +285,39 @@ function App() {
             </div>
           </div>
           <div className="weekly-budget">
-            <p>
-              Weekly Budget:{" "}
-              {calculateCalories(
-                dailyBudget.carbs,
-                dailyBudget.protein,
-                dailyBudget.fat,
-              ) * 7}{" "}
-              cal, {parseFloat(dailyBudget.carbs) * 7 || 0}g carbs,{" "}
-              {parseFloat(dailyBudget.protein) * 7 || 0}g protein,{" "}
-              {parseFloat(dailyBudget.fat) * 7 || 0}g fat
-            </p>
-            <p className="remaining">
-              Remaining: {remaining.calories.toFixed(0)} cal,{" "}
-              {remaining.carbs.toFixed(0)}g carbs,{" "}
-              {remaining.protein.toFixed(0)}g protein,{" "}
-              {remaining.fat.toFixed(0)}g fat
-            </p>
-            {filledDays > 0 && (
-              <p className="average">
-                Daily average ({filledDays} day{filledDays !== 1 ? "s" : ""}):{" "}
-                {average.calories.toFixed(0)} cal, {average.carbs.toFixed(0)}g
-                carbs, {average.protein.toFixed(0)}g protein,{" "}
-                {average.fat.toFixed(0)}g fat
-              </p>
-            )}
+            <h3>Weekly Remaining</h3>
+            <div className="remaining-bars">
+              {[
+                { label: "Calories", key: "calories", unit: "cal" },
+                { label: "Carbs", key: "carbs", unit: "g" },
+                { label: "Protein", key: "protein", unit: "g" },
+                { label: "Fat", key: "fat", unit: "g" },
+              ].map(({ label, key, unit }) => {
+                const budget = weeklyBudget[key];
+                const used = totals[key];
+                const pct =
+                  budget > 0 ? Math.min((used / budget) * 100, 100) : 0;
+                const over = used > budget;
+                return (
+                  <div className="remaining-bar-row" key={key}>
+                    <span className="remaining-bar-label">{label}</span>
+                    <div className="remaining-bar-track">
+                      <div
+                        className={`remaining-bar-fill${over ? " over" : ""}`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span
+                      className={`remaining-bar-value${over ? " over" : ""}`}
+                    >
+                      {over
+                        ? `${Math.abs(remaining[key]).toFixed(0)}${unit} over`
+                        : `${remaining[key].toFixed(0)}${unit} left`}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
