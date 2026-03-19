@@ -67,6 +67,38 @@ h2 {
   border-radius: 8px;
 }
 
+.budget-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.budget-header h2 {
+  margin: 0;
+}
+
+.lock-btn {
+  background: none;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.lock-btn:hover {
+  border-color: #667eea;
+  background: #f0f0ff;
+}
+
+.lock-btn.locked {
+  border-color: #667eea;
+  background: #eef0ff;
+}
+
 .budget-inputs {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

@@ -78,6 +78,9 @@ function App() {
 
   const [dailyBudget, setDailyBudget] = useState(getInitialDailyBudget);
   const [weeklyEntries, setWeeklyEntries] = useState(getInitialWeeklyEntries);
+  const [budgetLocked, setBudgetLocked] = useState(
+    () => getLocalStorage("macroBudgetLocked") ?? false,
+  );
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Mark as initialized after first render
@@ -97,6 +100,12 @@ function App() {
       setLocalStorage("macroWeeklyEntries", weeklyEntries);
     }
   }, [weeklyEntries, isInitialized]);
+
+  useEffect(() => {
+    if (isInitialized) {
+      setLocalStorage("macroBudgetLocked", budgetLocked);
+    }
+  }, [budgetLocked, isInitialized]);
 
   const handleDailyBudgetChange = (field, value) => {
     // Allow empty string or positive whole numbers only (no decimals)
@@ -122,6 +131,7 @@ function App() {
   };
 
   const handleClearAll = () => {
+    if (!window.confirm("Are you sure you want to clear all weekly entries?")) return;
     // Reset weekly entries
     const emptyWeeklyEntries = DAYS.reduce((acc, day) => {
       acc[day] = { calories: "", carbs: "", protein: "", fat: "" };
@@ -219,7 +229,16 @@ function App() {
         </div>
 
         <div className="budget-section">
-          <h2>Daily Budget</h2>
+          <div className="budget-header">
+            <h2>Daily Budget</h2>
+            <button
+              className={`lock-btn${budgetLocked ? " locked" : ""}`}
+              onClick={() => setBudgetLocked((prev) => !prev)}
+              title={budgetLocked ? "Unlock budget" : "Lock budget"}
+            >
+              {budgetLocked ? "🔒" : "🔓"}
+            </button>
+          </div>
           <div className="budget-inputs">
             <div className="input-group">
               <label>Calories</label>
@@ -242,6 +261,7 @@ function App() {
                 min="0"
                 step="1"
                 inputMode="numeric"
+                disabled={budgetLocked}
                 value={dailyBudget.carbs}
                 onChange={(e) =>
                   handleDailyBudgetChange("carbs", e.target.value)
@@ -256,6 +276,7 @@ function App() {
                 min="0"
                 step="1"
                 inputMode="numeric"
+                disabled={budgetLocked}
                 value={dailyBudget.protein}
                 onChange={(e) =>
                   handleDailyBudgetChange("protein", e.target.value)
@@ -270,6 +291,7 @@ function App() {
                 min="0"
                 step="1"
                 inputMode="numeric"
+                disabled={budgetLocked}
                 value={dailyBudget.fat}
                 onChange={(e) => handleDailyBudgetChange("fat", e.target.value)}
                 placeholder="Daily fat"
