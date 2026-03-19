@@ -184,20 +184,11 @@ function App() {
       return Math.round(remaining[field] / emptyCount);
     };
 
-    const filledDays = 7 - emptyFields.calories.length;
-    const average = {
-      calories: filledDays > 0 ? totals.calories / filledDays : 0,
-      carbs: filledDays > 0 ? totals.carbs / filledDays : 0,
-      protein: filledDays > 0 ? totals.protein / filledDays : 0,
-      fat: filledDays > 0 ? totals.fat / filledDays : 0,
-    };
 
     return {
       remaining,
       weeklyBudget,
       totals,
-      average,
-      filledDays,
       getPlaceholder,
       isEmptyField: (day, field) => {
         const value = parseFloat(weeklyEntries[day][field]);
@@ -210,8 +201,6 @@ function App() {
     remaining,
     weeklyBudget,
     totals,
-    average,
-    filledDays,
     getPlaceholder,
     isEmptyField,
   } = calculateRemaining();
