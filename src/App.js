@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 
+const fmt = (n) =>
+  Math.round(n).toLocaleString("nl-NL", { maximumFractionDigits: 0 });
+
 const DAYS = [
   "Monday",
   "Tuesday",
@@ -300,8 +303,11 @@ function App() {
                       className={`remaining-bar-value${over ? " over" : ""}`}
                     >
                       {over
-                        ? `${Math.abs(remaining[key]).toFixed(0)}${unit} over`
-                        : `${remaining[key].toFixed(0)}${unit} left`}
+                        ? `${fmt(Math.abs(remaining[key]))}${unit} over`
+                        : `${fmt(remaining[key])}${unit} left`}
+                    </span>
+                    <span className="remaining-bar-detail">
+                      {fmt(used)} / {fmt(budget)}{unit}
                     </span>
                   </div>
                 );

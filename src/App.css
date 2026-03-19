@@ -212,6 +212,15 @@ h2 {
   color: #e74c3c;
 }
 
+.remaining-bar-detail {
+  width: 130px;
+  text-align: right;
+  font-size: 0.8em;
+  color: #999;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .weekly-section {
   margin-top: 30px;
 }
@@ -363,6 +372,27 @@ h2 {
 
   .budget-inputs {
     grid-template-columns: 1fr;
+  }
+
+  .remaining-bar-row {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+
+  .remaining-bar-label {
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .remaining-bar-track {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .remaining-bar-value,
+  .remaining-bar-detail {
+    width: auto;
+    font-size: 0.8em;
   }
 
   /* Hide table on mobile */
